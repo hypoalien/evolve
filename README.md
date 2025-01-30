@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Evolve - Personal Growth & Daily Habit Tracker
 
-## Getting Started
+Transform your life through daily discipline, positive thinking, and conscious growth. Track habits, journal entries, and manifestations all in one place.
 
-First, run the development server:
+## Features
+
+- **Daily Habit Tracking**: Monitor and maintain your daily habits with ease
+- **Journal Entries**: Document your thoughts and reflections
+- **Manifestation Tools**: Set and visualize your goals
+- **Progress Analytics**: Track your personal growth journey
+- **Dark Mode**: System preference-based theme switching
+- **Responsive Design**: Built with Tailwind CSS for optimal viewing on all devices
+
+## Tech Stack
+
+- Next.js 15
+- React 19
+- TypeScript 5
+- MongoDB
+- Tailwind CSS
+- Geist Font
+- NextAuth.js for authentication
+- Shadcn UI components
+
+## Core Functionalities
+
+- **Habit Management**: Create, track, and analyze daily habits
+- **Journal System**: Write and maintain daily reflections
+- **Manifestation Dashboard**: Set and track your manifestation goals
+- **Progress Tracking**: Visual analytics of your growth journey
+- **Template System**: Customizable templates for daily tasks
+- **User Authentication**: Secure login and data management
+
+## Installation
 
 ```bash
+# Clone the repository
+git clone [repository-url]
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+
+# Run the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```plaintext
+DATABASE_URL=
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```plaintext
+├── app/
+│   ├── api/
+│   ├── (auth)/
+│   └── (dashboard)/
+├── components/
+├── lib/
+├── public/
+└── types/
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Contributing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
+MIT License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Developer
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Developed by [Anudeep](https://techwithdeep.com) with Perplexity
+
+---
+
+© 2025 Evolve. All rights reserved.
+
+---
