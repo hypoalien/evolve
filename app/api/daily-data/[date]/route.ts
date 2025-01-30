@@ -1,9 +1,10 @@
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { date: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ date: string }> }
 ) {
   try {
     const session = await auth();
@@ -17,35 +18,47 @@ export async function GET(
     }
 
     const { date } = await params;
-
     const client = await db;
+
+    // First get the user's template
+    const templateCollection = client.db().collection("templates");
+    const template = await templateCollection.findOne({ userId });
+
     const collection = client.db().collection("daily-data");
     const dailyData = await collection.findOne({
-      userId: userId,
-      date: date,
+      userId,
+      date,
     });
 
     if (!dailyData) {
+      const defaultItems = template || {
+        abstinenceItems: ["No Alcohol"],
+        dailyTasks: ["Workout", "Eat healthy"],
+      };
+
       const emptyData = {
-        date: date,
-        abstinenceItems: [
-          { id: 1, text: "No Alcohol", completed: false },
-          { id: 2, text: "No Weed", completed: false },
-          { id: 3, text: "No Fap", completed: false },
-          { id: 4, text: "No Women", completed: false },
-        ],
-        dailyTasks: [
-          { id: 1, text: "Leetcode", completed: false },
-          { id: 2, text: "Gym", completed: false },
-          { id: 3, text: "Right Food", completed: false },
-        ],
+        date,
+        abstinenceItems: defaultItems.abstinenceItems.map(
+          (text: string, index: number) => ({
+            id: index + 1,
+            text,
+            completed: false,
+          })
+        ),
+        dailyTasks: defaultItems.dailyTasks.map(
+          (text: string, index: number) => ({
+            id: index + 1,
+            text,
+            completed: false,
+          })
+        ),
         manifestations: Array(5).fill(""),
         journalEntry: "",
       };
-      return new Response(JSON.stringify(emptyData), { status: 200 });
+      return NextResponse.json(emptyData);
     }
 
-    return new Response(JSON.stringify(dailyData), { status: 200 });
+    return NextResponse.json(dailyData);
   } catch (error) {
     console.error("Error fetching daily data:", error);
     return new Response("Internal server error", { status: 500 });

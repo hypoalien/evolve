@@ -16,14 +16,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Plus, Edit, Trash, Sparkles } from "lucide-react";
+import { Plus, Trash, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Calendar } from "@/components/ui/calendar";
+import { TemplateSheet } from "@/components/template-sheet";
 import { format } from "date-fns";
+import { journalPrompts } from "@/questions";
 import {
   Popover,
   PopoverContent,
@@ -31,7 +33,21 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import axios from "axios";
-
+declare global {
+  interface Date {
+    getDayOfYear(): number;
+  }
+}
+// Add this helper function at the top of the file
+Date.prototype.getDayOfYear = function () {
+  const start = new Date(this.getFullYear(), 0, 0);
+  const diff =
+    this.getTime() -
+    start.getTime() +
+    (start.getTimezoneOffset() - this.getTimezoneOffset()) * 60 * 1000;
+  const oneDay = 1000 * 60 * 60 * 24;
+  return Math.floor(diff / oneDay);
+};
 interface Item {
   id: number;
   text: string;
@@ -44,6 +60,7 @@ interface DailyData {
   dailyTasks: Item[];
   manifestations: string[];
   journalEntry: string;
+  journalPrompt: string; // Add this line
 }
 
 export default function DashboardPage() {
@@ -52,34 +69,46 @@ export default function DashboardPage() {
   const [isFetching, setIsFetching] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  //   const [dailyData, setDailyData] = useState<DailyData>({
+  //     date: format(new Date(), "yyyy-MM-dd"),
+  //     abstinenceItems: [
+  //       { id: 1, text: "No Alcohol", completed: false },
+  //       { id: 2, text: "No Weed", completed: false },
+  //       { id: 3, text: "No Fap", completed: false },
+  //       { id: 4, text: "No Women", completed: false },
+  //     ],
+  //     dailyTasks: [
+  //       { id: 1, text: "Leetcode", completed: false },
+  //       { id: 2, text: "Gym", completed: false },
+  //       { id: 3, text: "Right Food", completed: false },
+  //     ],
+  //     manifestations: Array(5).fill(""),
+  //     journalEntry: "",
+  //   });
   const [dailyData, setDailyData] = useState<DailyData>({
     date: format(new Date(), "yyyy-MM-dd"),
-    abstinenceItems: [
-      { id: 1, text: "No Alcohol", completed: false },
-      { id: 2, text: "No Weed", completed: false },
-      { id: 3, text: "No Fap", completed: false },
-      { id: 4, text: "No Women", completed: false },
-    ],
-    dailyTasks: [
-      { id: 1, text: "Leetcode", completed: false },
-      { id: 2, text: "Gym", completed: false },
-      { id: 3, text: "Right Food", completed: false },
-    ],
+    abstinenceItems: [],
+    dailyTasks: [],
     manifestations: Array(5).fill(""),
     journalEntry: "",
+    journalPrompt: journalPrompts[new Date().getDayOfYear() - 1], // Add this line
   });
-
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [newAbstinenceItem, setNewAbstinenceItem] = useState<string>("");
   const [newDailyTask, setNewDailyTask] = useState<string>("");
 
   //   const fetchDailyData = async (date: Date) => {
   //     try {
+  //       setIsFetching(true);
   //       const formattedDate = format(date, "yyyy-MM-dd");
   //       const response = await axios.get(`/api/daily-data/${formattedDate}`);
   //       setDailyData(response.data);
   //     } catch (error) {
-  //       toast.error("Failed to fetch data");
+  //       toast.error("Failed to fetch data", {
+  //         position: "top-center",
+  //       });
+  //     } finally {
+  //       setIsFetching(false);
   //     }
   //   };
   const fetchDailyData = async (date: Date) => {
@@ -87,8 +116,25 @@ export default function DashboardPage() {
       setIsFetching(true);
       const formattedDate = format(date, "yyyy-MM-dd");
       const response = await axios.get(`/api/daily-data/${formattedDate}`);
-      setDailyData(response.data);
+      const dayOfYear = date.getDayOfYear() - 1;
+
+      // If there's existing data, use it, otherwise use the prompt for that day
+      setDailyData({
+        ...response.data,
+        journalPrompt: response.data.journalPrompt || journalPrompts[dayOfYear],
+      });
     } catch (error) {
+      console.error(error);
+      // If no data exists for this date, create new data with the day's prompt
+      const dayOfYear = date.getDayOfYear() - 1;
+      setDailyData({
+        date: format(date, "yyyy-MM-dd"),
+        abstinenceItems: [],
+        dailyTasks: [],
+        manifestations: Array(5).fill(""),
+        journalEntry: "",
+        journalPrompt: journalPrompts[dayOfYear],
+      });
       toast.error("Failed to fetch data", {
         position: "top-center",
       });
@@ -96,6 +142,7 @@ export default function DashboardPage() {
       setIsFetching(false);
     }
   };
+
   const saveAllData = async () => {
     try {
       setIsSaving(true);
@@ -108,6 +155,7 @@ export default function DashboardPage() {
         position: "top-center",
       });
     } catch (error) {
+      console.error(error);
       toast.error("Failed to save data", {
         position: "top-center",
       });
@@ -356,7 +404,7 @@ export default function DashboardPage() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Support</DropdownMenuItem>
+
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={(event) => {
@@ -409,6 +457,10 @@ export default function DashboardPage() {
           <div className="max-w-7xl mx-auto space-y-8">
             <div className="flex justify-between items-center">
               <DatePickerComponent />
+              <TemplateSheet
+                onTemplateUpdate={() => fetchDailyData(selectedDate)}
+              />
+
               <p className="text-sm text-gray-500">
                 Today: {format(new Date(), "PPP")}
               </p>
@@ -590,6 +642,7 @@ export default function DashboardPage() {
               </Card>
 
               {/* Journal Card */}
+
               <Card className="bg-white/5 backdrop-blur-sm border-2 border-emerald-500/20 shadow-xl lg:col-span-3">
                 <CardHeader className="space-y-1">
                   <CardTitle className="text-2xl font-bold text-emerald-500">
@@ -600,6 +653,11 @@ export default function DashboardPage() {
                   </p>
                 </CardHeader>
                 <CardContent>
+                  <div className="mb-4 p-4 bg-emerald-50 rounded-lg">
+                    <p className="text-emerald-700 font-medium">
+                      Today&apos;s Prompt: {dailyData.journalPrompt}
+                    </p>
+                  </div>
                   <Textarea
                     placeholder="Write your thoughts here..."
                     className="min-h-[150px] border-emerald-500/20 focus:border-emerald-500"
@@ -613,8 +671,8 @@ export default function DashboardPage() {
             {/* Quote section */}
             <div className="text-center py-6">
               <blockquote className="italic text-gray-600 max-w-2xl mx-auto">
-                "Whatever the mind can conceive and believe, it can achieve." -
-                Napoleon Hill
+                &quot;Whatever the mind can conceive and believe, it can
+                achieve.&quot; - Napoleon Hill
               </blockquote>
             </div>
             <SubmitAllButton />
