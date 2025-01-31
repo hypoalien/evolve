@@ -70,7 +70,7 @@ export default function Header({ user }: any) {
                   callbackUrl: `${window.location.origin}/login`,
                 });
               }}
-              className="text-destructive focus:text-destructive"
+              className="text-primary focus:text-white"
             >
               Logout
             </DropdownMenuItem>
