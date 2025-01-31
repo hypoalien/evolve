@@ -48,7 +48,7 @@ export function TemplateSheet({
       toast.success("Template saved successfully");
       onTemplateUpdate();
     } catch (error) {
-      console.error(error)
+      console.error(error);
       toast.error("Failed to save template");
     }
   };
